@@ -1,6 +1,6 @@
 import { Product } from "@prisma/client";
 import { products } from "@/prisma/data/products";
-import { formatCurrency } from "@/src/lib/utils";
+import { formatCurrency } from "@/src/utils";
 import Link from "next/link";
 import { ProductWithCategory } from "@/app/admin/products/page";
 

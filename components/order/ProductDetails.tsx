@@ -1,6 +1,6 @@
 import { XCircleIcon,MinusIcon,PlusIcon } from "@heroicons/react/24/outline"
 import { OrderItem } from "@/src/types"
-import { formatCurrency } from "@/src/lib/utils"
+import { formatCurrency } from "@/src/utils"
 import { useStore } from "@/src/store"
 import { useMemo } from "react"
 
