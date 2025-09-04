@@ -1,80 +1,73 @@
-import { prisma } from "@/src/lib/prisma"
-import { Category, Product } from '@prisma/client';
+'use client';
+import { useEffect, useState } from "react";
 import ImageUpload from "./ImageUpload";
 
-const getCategories=async ()=>{
-    return await prisma.category.findMany();
-}
+type Category = {
+  id: string;
+  name: string;
+};
 
+type ProductFormProps = {
+  product?: {
+    name?: string;
+    price?: number;
+    categoryId?: string;
+    image?: string;
+  };
+};
 
-type ProductFormProps ={
-    product?:Product
-}
+export default function ProductForm({ product }: ProductFormProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
 
+  useEffect(() => {
+    fetch("/api/categories")
+      .then(res => res.json())
+      .then(data => setCategories(data));
+  }, []);
 
-export default async function ProductForm({product}:ProductFormProps) {
+  return (
+    <>
+      <div className="space-y-2">
+        <label htmlFor="name" className="text-slate-800">Nombre:</label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          defaultValue={product?.name}
+          placeholder="Nombre Producto"
+          className="block w-full p-3 bg-slate-100 border border-gray-300 rounded"
+        />
+      </div>
 
-    const categories = await getCategories();
+      <div className="space-y-2">
+        <label htmlFor="price" className="text-slate-800">Precio:</label>
+        <input
+          id="price"
+          name="price"
+          type="number"
+          step="0.01"
+          defaultValue={product?.price}
+          placeholder="Precio Producto"
+          className="block w-full p-3 bg-slate-100 border border-gray-300 rounded"
+        />
+      </div>
 
-    return (
-        <>
-            <div className="space-y-2">
-                <label
-                    className="text-slate-800"
-                    htmlFor="name"
-                >Nombre:</label>
-                <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    className="block w-full p-3 bg-slate-100"
-                    placeholder="Nombre Producto"
-                    defaultValue={product?.name}
-                />
-            </div>
+      <div className="space-y-2">
+        <label htmlFor="categoryId" className="text-slate-800">Categoría:</label>
+        <select
+          id="categoryId"
+          name="categoryId"
+          defaultValue={product?.categoryId}
+          className="block w-full p-3 bg-slate-200 border border-gray-300 rounded"
+        >
+          <option value="">-- Seleccione --</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
+        </select>
+      </div>
 
-            <div className="space-y-2">
-                <label
-                    className="text-slate-800"
-                    htmlFor="price"
-                >Precio:</label>
-                <input
-                    id="price"
-                    name="price"
-                    className="block w-full p-3 bg-slate-100"
-                    placeholder="Precio Producto"
-                    defaultValue={product?.price}
-                />
-            </div>
-
-            <div className="space-y-2">
-                <label
-                    className="text-slate-800"
-                    htmlFor="categoryId"
-                >Categoría:</label>
-                <select
-                    className="block w-full p-3 bg-slate-200"
-                    id="categoryId"
-                    name="categoryId"
-                    defaultValue={product?.categoryId}
-                >
-                    <option value="">-- Seleccione --</option>
-                    {
-                        categories.map(category=>(
-                            <option
-                            key={category.id}
-                            value={category.id}
-                            >
-                                {category.name}
-                            </option>
-                        ))
-                    }
-          
-                </select>
-            </div>
-            <ImageUpload
-            image={product?.image}
-            />
-        </>
-    )
+      <ImageUpload image={product?.image} />
+    </>
+  );
 }

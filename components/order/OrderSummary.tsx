@@ -1,85 +1,115 @@
-"use client";
+// OrderSummary.tsx
+'use client';
+
+import { useMemo, useState } from "react";
 import { useStore } from "@/src/store";
 import ProductDetails from "./ProductDetails";
-import { useMemo } from "react";
 import { formatCurrency } from "@/src/utils";
 import { createOrder } from "@/actions/create-order-action";
 import { OrderSchema } from "@/src/schema";
 import { toast } from "react-toastify";
 
-export default function OrderSummary() {
+type Props = {
+  role: "client" | "waiter" | "admin";
+  tableId?: string;
+};
+
+export default function OrderSummary({ role, tableId }: Props) {
   const order = useStore((state) => state.order);
-  const clearOrder = useStore((state) => state.clearOrder)
+  const clearOrder = useStore((state) => state.clearOrder);
   const total = useMemo(
-    () => order.reduce((total, item) => total + item.quantity * item.price, 0),
+    () => order.reduce((sum, i) => sum + i.quantity * i.price, 0),
     [order]
   );
+  const [loading, setLoading] = useState(false);
 
-  const handleCreateOrder = async(formData:FormData) => {
-    
-    const data ={
-      name:formData.get('name'),
+  const handleCreateOrder = async (formData: FormData) => {
+    setLoading(true);
+    const data = {
+      name: formData.get("name"),
       total,
-      order
+      order,
+      tableId: tableId || formData.get("table"),
+    };
+
+    const result = OrderSchema.safeParse(data);
+    if (!result.success) {
+      result.error.issues.forEach((i) => toast.error(i.message));
+      setLoading(false);
+      return;
     }
 
-    const result = OrderSchema.safeParse(data)
-    
-    if(!result.success){
-      result.error.issues.forEach((issue) => {
-        toast.error(issue.message)
-      })
-
-      return
+    const response = await createOrder(data);
+    if (response?.errors) {
+      response.errors.forEach((i) => toast.error(i.message));
+      setLoading(false);
+      return;
     }
 
-    
-    const response = await createOrder(data)
-    if(response?.errors){
-      response.errors.forEach((issue) => {
-        toast.error(issue.message)
-      })
-    }
-
-    toast.success('Pedido Realizado Correctamente')
-    clearOrder()
-  }
+    toast.success("Pedido realizado correctamente");
+    clearOrder();
+    setLoading(false);
+  };
 
   return (
-    <aside className="lg:h-screen lg:overflow-y-scroll md:w-64 lg:w-96 p-5">
-      <h1 className="text-4xl text-center font-black">Mipedido</h1>
+    <aside className="bg-white shadow-md border border-gray-200 rounded-t-lg md:rounded-none md:h-full overflow-y-auto p-3">
+      <h2 className="text-lg font-bold text-center mb-3">Mi Pedido</h2>
 
       {order.length === 0 ? (
-        <p className="text-center my-10">El carrito esta vacio</p>
+        <div className="text-center text-gray-500 mt-5">
+          <p>El carrito está vacío</p>
+        </div>
       ) : (
-        <div className="mt-5">
+        <div className="flex flex-col divide-y divide-gray-200">
           {order.map((item) => (
-            <ProductDetails 
-            key={item.id} 
-            item={item} 
-            />
+            <ProductDetails key={item.id} item={item} />
           ))}
 
-          <p className="text-2xl mt-20 text-center">
-            Total a pagar :{""}
-            <span className="font-bold">{formatCurrency(total)}</span>
-          </p>
-          <form 
-          className="w-full mt-10 space-y-5"
-          action={handleCreateOrder}
-          >
-            <input 
-            type="text" 
-            placeholder="Tu Nombre"
-            className="bg-white border border-gray-100 p-2 w-full"
-            name="name"
-            />
+          <div className="mt-2 flex justify-between font-bold text-gray-800">
+            <span>Total:</span>
+            <span className="text-green-600">{formatCurrency(total)}</span>
+          </div>
 
-            <input type="submit" 
-             className="py-2 rounded uppercase text-white bg-black w-full text-center cursor-pointer font-bold"
-             value='Confirmar Pedido'
-            />
-          </form>
+          {role !== "admin" && (
+            <form
+              className="mt-3 flex flex-col gap-2"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                await handleCreateOrder(new FormData(e.currentTarget));
+              }}
+            >
+              {role === "waiter" && !tableId && (
+                <input
+                  type="text"
+                  name="table"
+                  placeholder="Número de mesa"
+                  required
+                  className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              )}
+
+              {role === "client" && (
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Nombre del cliente (opcional)"
+                  className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`p-2 rounded font-bold text-white ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-sky-600 hover:bg-sky-700"
+                }`}
+              >
+                {loading ? "Procesando..." : "Confirmar Pedido"}
+              </button>
+            </form>
+          )}
         </div>
       )}
     </aside>

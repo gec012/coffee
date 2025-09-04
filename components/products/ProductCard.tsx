@@ -1,42 +1,39 @@
-
-
-import { Product } from "@prisma/client"
-import { formatCurrency, getImagePath } from '../../src/utils/index';
+import { Product } from "@prisma/client";
+import { formatCurrency, getImagePath } from "@/src/utils";
 import Image from "next/image";
 import AddProductButton from "./AddProductButton";
-import { products } from '../../prisma/data/products';
 
 type ProductCardProps = {
-    product:Product
-}
+  product: Product;
+};
 
-export default function ProductCard({product}:ProductCardProps) {
-
-  const imagePath = getImagePath(product.image)
+export default function ProductCard({ product }: ProductCardProps) {
+  const imagePath = getImagePath(product.image);
 
   return (
-    <div className="border bg-white rounded border-gray-200 shadow-lg ">
-
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-150 overflow-hidden flex flex-col">
+      {/* Imagen pequeña */}
+      <div className="relative w-full h-36">
         <Image
-         width={400}
-         height={500}
-         className="rounded"
-         src={imagePath}
-         alt={`Imagen platillo ${product.name}`}
-         quality={50}
-         priority
+          src={imagePath}
+          alt={product.name}
+          fill
+          className="object-cover"
+          quality={60}
+          priority
         />
+      </div>
 
-
-       <div className="p-5">
-            <h3 className=" text-2xl font-bold ">{product.name}</h3>
-            <p className=" mt-5 font-black text-4xl text-teal-500">
-            {formatCurrency(product.price)}
-            </p>
-           <AddProductButton
-           product={product}
-           />    
-        </div> 
+      <div className="p-3 flex flex-col justify-between flex-1">
+        <h3 className="text-sm font-semibold line-clamp-2">{product.name}</h3>
+        <p className="text-teal-500 font-bold text-sm mt-1">
+          {formatCurrency(product.price)}
+        </p>
+        <div className="mt-2">
+          <AddProductButton product={product} />
+        </div>
+      </div>
     </div>
-  )
+  );
 }
+

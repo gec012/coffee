@@ -35,9 +35,7 @@ export default async function EditProductPage({params}:{params:{id:string}}) {
       <GoBackButton/>
 
       <EditProductForm>
-        <ProductForm
-        product={product}
-        />
+        <ProductForm/>
       </EditProductForm>  
 
     </div>

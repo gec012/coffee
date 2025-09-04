@@ -1,72 +1,56 @@
-import { XCircleIcon,MinusIcon,PlusIcon } from "@heroicons/react/24/outline"
-import { OrderItem } from "@/src/types"
-import { formatCurrency } from "@/src/utils"
-import { useStore } from "@/src/store"
-import { useMemo } from "react"
+'use client';
 
+import { XCircleIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { OrderItem } from "@/src/store";
+import { formatCurrency } from "@/src/utils";
+import { useStore } from "@/src/store";
 
-type ProductDetailsProps={
-    item:OrderItem
-}
+type Props = {
+  item: OrderItem;
+};
 
-const MIN_ITEM = 1
-const MAX_ITEM = 5
+export default function ProductDetails({ item }: Props) {
+  const increaseQuantity = useStore((state) => state.increaseQuantity);
+  const decreaseQuantity = useStore((state) => state.decreaseQuantity);
+  const removeItem = useStore((state) => state.removeItem);
 
-export default function ProductDetails({item}:ProductDetailsProps) {
-  
-  const increaseQuantity = useStore((store)=>store.increaseQuantity)
-  const decreaseQuantity = useStore((store)=>store.decreaseQuantity)
-  const removeItem = useStore((store)=>store.removeItem)
-  const disableDecreaseButton = useMemo(()=>item.quantity=== MIN_ITEM,[item])
-  const disableIncreaseButton = useMemo(()=>item.quantity=== MAX_ITEM,[item])
-
-
-    return (
-        <div className="shadow space-y-1 p-4 bg-white  border-t border-gray-200 ">
-        <div className="space-y-4">
-          <div className="flex justify-between items-start">
-              <p className="text-xl font-bold">{item.name} </p>
-      
-              <button
-                type="button"
-                onClick={() => removeItem(item.id)}
-              >
-                <XCircleIcon className="text-red-700 h-8 w-8"/>
-              </button>
-          </div>
-          <p className="text-2xl text-teal-500 font-black">
-              {formatCurrency(item.price)}
-          </p>
-          <div className="flex gap-5 px-10 py-2 bg-gray-100 w-fit rounded-lg">
-              <button
-                type="button"
-                onClick={() => decreaseQuantity(item.id)}
-                disabled={disableDecreaseButton}
-                className="disabled:opacity-20"
-              >
-                  <MinusIcon className="h-6 w-6"/>
-              </button>
-      
-              <p className="text-lg font-black ">
-                {item.quantity}
-              </p>
-      
-              <button
-                 type="button"
-                 onClick={() => increaseQuantity(item.id)}
-                 className="disabled:opacity-10"
-                 disabled={disableIncreaseButton}
-              >
-                  <PlusIcon className="h-6 w-6"/>
-              </button>
-          </div>
-          <p className="text-xl font-black text-gray-700">
-              Subtotal: {''}
-              <span className="font-normal"> 
-                    {formatCurrency(item.subtotal)}
-              </span>
-          </p>
-        </div>
+  return (
+    <div className="flex items-center justify-between p-2 border-b border-gray-200">
+      {/* Nombre y subtotal */}
+      <div className="flex-1 flex flex-col">
+        <span className="text-sm font-semibold">{item.name}</span>
+        <span className="text-xs text-gray-600">
+          {formatCurrency(item.price * item.quantity)}
+        </span>
       </div>
-  )
+
+      {/* Controles de cantidad */}
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => decreaseQuantity(item.id)}
+          className="disabled:opacity-30 p-1"
+          disabled={item.quantity <= 1}
+        >
+          <MinusIcon className="h-4 w-4" />
+        </button>
+
+        <span className="text-sm font-bold w-5 text-center">{item.quantity}</span>
+
+        <button
+          onClick={() => increaseQuantity(item.id)}
+          className="disabled:opacity-30 p-1"
+        >
+          <PlusIcon className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Botón eliminar */}
+      <button
+        onClick={() => removeItem(item.id)}
+        className="text-red-600 p-1"
+      >
+        <XCircleIcon className="h-5 w-5" />
+      </button>
+    </div>
+  );
 }

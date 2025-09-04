@@ -3,14 +3,15 @@ import ProductForm from "@/components/products/ProductForm";
 import Heading from "@/components/ui/Heading";
 
 
-export default function CreateProductPage() {
+export default async function CreateProductPage() {
+  const product = null; // o cargar producto existente
   return (
     <>
-    <Heading>Nuevo Producto</Heading>
-    <AddProductForm>
-     <ProductForm/>
-
-    </AddProductForm>
+      <Heading>Nuevo Producto</Heading>
+      <AddProductForm>
+        <ProductForm/>
+      </AddProductForm>
     </>
   )
 }
+

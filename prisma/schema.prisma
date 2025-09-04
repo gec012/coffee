@@ -1,6 +1,6 @@
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 datasource db {
@@ -9,39 +9,53 @@ datasource db {
 }
 
 model Product {
-  id Int @id @default(autoincrement()) 
-  name String
-  price Float
-  image String
-  categoryId Int 
-  category Category @relation(fields: [categoryId],references: [id])
-  orderItems OrderProducts[]
+  id          Int             @id @default(autoincrement())
+  name        String
+  price       Float
+  image       String
+  categoryId  Int
+  category    Category        @relation(fields: [categoryId], references: [id])
+  orderItems  OrderProducts[]
 }
+
 model Category {
-  id Int @id @default(autoincrement())
-  name String
-  slug String
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String
   products Product[]
 }
 
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String
+  email    String   @unique
+  role     String   // "client", "waiter", "admin"
+  orders   Order[]
+}
 
-  model Order {
-    id Int @id @default(autoincrement())
-    name String
-    total Float
-    date DateTime @default(now())
-    status Boolean @default(false)
-    orderReadyAt DateTime?
-    orderProducts OrderProducts[]
+model Order {
+  id              Int             @id @default(autoincrement())
+  name            String?         // opcional, si cliente local quiere nombre
+  total           Float
+  date            DateTime        @default(now())
+  status          String          @default("pendiente") // "pendiente", "en_preparacion", "listo_para_entregar", "entregado"
+  tableId         String?         // opcional, mesa
+  userId          Int?            // nullable si cliente local anónimo
+  user            User?           @relation(fields: [userId], references: [id])
+  orderProducts   OrderProducts[]
+  paymentStatus   String          @default("pendiente") // "pendiente", "pagado"
+  paymentMethod   String?         // "efectivo", "tarjeta", "mercadopago", "transferencia"
+  deliveryAddress String?         // solo si es delivery
+  deliveryComment String?         // solo si es delivery
+  ticketGenerated Boolean         @default(false)
+  paymentProof    String?         // URL o path del comprobante de transferencia
 }
 
 model OrderProducts {
-  id Int @id @default(autoincrement())
-  orderId Int
-  order Order @relation(fields: [orderId],references: [id])
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
   productId Int
-  product Product @relation(fields: [productId],references: [id])
-  quantity Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
 }
-
-
