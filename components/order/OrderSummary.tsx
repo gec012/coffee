@@ -25,11 +25,15 @@ export default function OrderSummary({ role, tableId }: Props) {
 
   const handleCreateOrder = async (formData: FormData) => {
     setLoading(true);
+
     const data = {
-      name: formData.get("name"),
+      name: formData.get("name")?.toString() || undefined,
       total,
-      order,
-      tableId: tableId || formData.get("table"),
+      orderProducts: order.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+      })),
+      tableId: tableId || formData.get("table")?.toString() || undefined,
     };
 
     const result = OrderSchema.safeParse(data);
@@ -39,7 +43,7 @@ export default function OrderSummary({ role, tableId }: Props) {
       return;
     }
 
-    const response = await createOrder(data);
+    const response = await createOrder(result.data);
     if (response?.errors) {
       response.errors.forEach((i) => toast.error(i.message));
       setLoading(false);
@@ -50,6 +54,7 @@ export default function OrderSummary({ role, tableId }: Props) {
     clearOrder();
     setLoading(false);
   };
+
 
   return (
     <aside className="bg-white shadow-md border border-gray-200 rounded-t-lg md:rounded-none md:h-full overflow-y-auto p-3">
@@ -70,7 +75,7 @@ export default function OrderSummary({ role, tableId }: Props) {
             <span className="text-green-600">{formatCurrency(total)}</span>
           </div>
 
-          {role !== "admin" && (
+          
             <form
               className="mt-3 flex flex-col gap-2"
               onSubmit={async (e) => {
@@ -78,17 +83,21 @@ export default function OrderSummary({ role, tableId }: Props) {
                 await handleCreateOrder(new FormData(e.currentTarget));
               }}
             >
-              {role === "waiter" && !tableId && (
+              {/* Mozo y Admin pueden cargar mesa */}
+              {((role === "waiter" || role === "admin") && !tableId) && (
                 <input
                   type="text"
                   name="table"
                   placeholder="Número de mesa"
-                  required
+                  required={role === "waiter"}  // 👈 obligatorio solo para mozo
                   className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               )}
 
-              {role === "client" && (
+
+
+              {/* Cliente y Admin pueden cargar nombre */}
+              {((role === "client" || role === "admin")) && (
                 <input
                   type="text"
                   name="name"
@@ -97,19 +106,21 @@ export default function OrderSummary({ role, tableId }: Props) {
                 />
               )}
 
+
+
               <button
                 type="submit"
                 disabled={loading}
-                className={`p-2 rounded font-bold text-white ${
-                  loading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-sky-600 hover:bg-sky-700"
-                }`}
+                className={`p-2 rounded font-bold text-white ${loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-sky-600 hover:bg-sky-700"
+                  }`}
               >
                 {loading ? "Procesando..." : "Confirmar Pedido"}
               </button>
             </form>
-          )}
+
+          
         </div>
       )}
     </aside>

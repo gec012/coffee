@@ -22,9 +22,10 @@ export default async function Orderpage({params:{category}}:{params:{category:st
 const products = await getProducts(category)
   return (
     <>
-    <Heading>
-      Elije y personaliza tu pedido a continuacion
-    </Heading>
+   <Heading subtitle="Seleccioná los productos que quieras y personalizá tu pedido">
+  Arma tu pedido
+</Heading>
+
      <div className="grid grid-cols-1  xl:grid-cols-2 2xl:grid-cols-4 gap-4 items-start">
         {products.map((product=>
            <ProductCard

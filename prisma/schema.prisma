@@ -51,11 +51,15 @@ model Order {
   paymentProof    String?         // URL o path del comprobante de transferencia
 }
 
-model OrderProducts {
-  id        Int     @id @default(autoincrement())
-  orderId   Int
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
+
+ model OrderProducts {
+  id         Int     @id @default(autoincrement())
+  orderId    Int
+  order      Order   @relation(fields: [orderId], references: [id])
+  productId  Int
+  product    Product @relation(fields: [productId], references: [id])
+  quantity   Int
+  dispatched Boolean @default(false) // ✅ nuevo campo
 }
+
+

@@ -13,7 +13,7 @@ type Props = {
   tableId?: string; 
 };
 
-export default function RootLayout({ children, role = "client", tableId }: Props) {
+export default function RootLayout({ children, role = "admin", tableId }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 

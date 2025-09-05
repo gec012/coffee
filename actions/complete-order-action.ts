@@ -1,35 +1,24 @@
-"use server"
-import { revalidatePath } from "next/cache";
+"use server";
+
 import { prisma } from "@/src/lib/prisma";
-import { OrderIdSchema } from "@/src/schema";
+import { revalidatePath } from "next/cache";
 
- 
+type CompleteOrderParams = {
+  orderId: number;
+  isDelivery: boolean;
+};
 
-export async function completeOrder(formData:FormData) {
-  const data={
-    orderId : formData.get('order_id')
+export async function completeOrder({ orderId, isDelivery }: CompleteOrderParams) {
+  try {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: isDelivery ? "listo_para_entregar" : "entregado",
+      },
+    });
+    revalidatePath("/admin/orders");
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error al actualizar la orden");
   }
-
-  const result = OrderIdSchema.safeParse(data)
-
-  if(result.success){
-    try {
-        await prisma.order.update({
-            where:{
-                id: result.data.orderId,
-            },
-            
-             data:{
-                status:true,
-                orderReadyAt:new Date(Date.now())
-             }   
-            
-        })
-        revalidatePath('/admin/orders')
-      } catch (error) {
-        console.log(error)
-      }
-  }
-
- 
 }
