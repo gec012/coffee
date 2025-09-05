@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
@@ -11,19 +9,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"   # expone PostgreSQL a tu PC
+      - "5432:5432"
 
   web:
     build: .
     ports:
-      - "3000:3000"
+      - "3000:3000"     # tu app Next
+      - "5555:5555"     # Prisma Studio
     depends_on:
       - db
     env_file:
       - .env
     volumes:
       - .:/app
+      - /app/node_modules   # 🔑 evita que se pisen las dependencias instaladas en la imagen
     command: npm run dev
 
 volumes:
   postgres_data:
+
