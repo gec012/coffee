@@ -10,7 +10,7 @@ type CompleteOrderParams = {
 
 export async function completeOrder({ orderId, isDelivery }: CompleteOrderParams) {
   try {
-    await prisma.order.update({
+    await prisma.orderTable.update({
       where: { id: orderId },
       data: {
         status: isDelivery ? "listo_para_entregar" : "entregado",

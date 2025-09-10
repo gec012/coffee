@@ -12,25 +12,35 @@ export async function createOrder(data: unknown) {
   }
 
   try {
-    await prisma.order.create({
+    // Asegurarse de que orderProducts sea un array válido
+    const orderProductsData = Array.isArray(result.data.orderProducts)
+      ? result.data.orderProducts.map((p) => ({
+          productId: p.productId,
+          quantity: p.quantity,
+        }))
+      : [];
+
+    await prisma.orderTable.create({
       data: {
-        name: result.data.name,
+        name: result.data.name || null,
         total: result.data.total,
-        tableId: result.data.tableId,
-        userId: result.data.userId,
-        status: "en_preparacion", // ✅ orden creada en preparación
+        tableId: result.data.tableId || null,
+        userId: result.data.userId || null,
+        status: "pendiente",
+        paymentStatus: "pendiente",
+        paymentMethod: result.data.paymentMethod || null,
+        deliveryAddress: result.data.deliveryAddress || null,
+        deliveryComment: result.data.deliveryComment || null,
+        ticketGenerated: false,
         orderProducts: {
-          create: result.data.orderProducts.map((p) => ({
-            productId: p.productId,
-            quantity: p.quantity,
-          })),
+          create: orderProductsData,
         },
       },
     });
 
     return { success: true };
   } catch (error) {
-    console.log(error);
+    console.error("Error al crear la orden en el servidor:", error);
     return { errors: [{ message: "Error al crear la orden en el servidor" }] };
   }
 }

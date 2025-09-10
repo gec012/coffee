@@ -2,10 +2,10 @@
 import { prisma } from "@/src/lib/prisma";
 
 export async function GET() {
-  const orders = await prisma.order.findMany({
+  const orders = await prisma.orderTable.findMany({
     where: {
       status: {
-        in: ["en_preparacion", "listo_para_entregar"], // 👈 ahora trae las activas
+        in: ["en_preparacion", "listo_para_entregar", "pendiente"], // 👈 trae las activas
       },
     },
     include: {
