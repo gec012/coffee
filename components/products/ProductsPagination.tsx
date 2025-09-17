@@ -1,51 +1,38 @@
-import Link from "next/link";
+'use client'
 
-type ProductsPaginationProps = {
+import { useRouter } from 'next/navigation';
+
+interface Props {
   page: number;
   totalPages: number;
-};
+}
 
+export default function ProductsPagination({ page, totalPages }: Props) {
+  const router = useRouter();
 
-export default function ProductsPagination({
-  page,
-  totalPages,
-}: ProductsPaginationProps) {
-
-
-const pages = Array.from({length: totalPages},(_,i)=>i+1)
+  const goToPage = (newPage: number) => {
+    router.push(`/admin/products?page=${newPage}`);
+  };
 
   return (
-    <nav className="flex justify-center py-10">
-      {page > 1 && (
-        <Link
-          href={`/admin/products?page=${page - 1}`}
-          className="bg-white px-4 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0"
-        >
-          &laquo;
-        </Link>
-      )}
+    <div className="flex gap-2 mt-4">
+      <button
+        disabled={page === 1}
+        onClick={() => goToPage(page - 1)}
+        className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        Anterior
+      </button>
 
-      {pages.map(currentPage =>(
-        
-        <Link
-        key={currentPage}
-        href={`/admin/products?page=${currentPage}`}
-        className={`${page===currentPage ?' bg-teal-400 ': 'bg-white'} px-4 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0`}
-        >
-        {currentPage}
-        </Link>
-      ))}
+      <span className="px-4 py-2">{page} / {totalPages}</span>
 
-
-
-      {page < totalPages && (
-        <Link
-          href={`/admin/products?page=${page + 1}`}
-          className="bg-white px-4 py-2 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0"
-        >
-          &raquo;
-        </Link>
-      )}
-    </nav>
+      <button
+        disabled={page === totalPages}
+        onClick={() => goToPage(page + 1)}
+        className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+      >
+        Siguiente
+      </button>
+    </div>
   );
 }

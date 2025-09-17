@@ -1,45 +1,46 @@
-'use client'
-import { Category } from "@prisma/client";
-import Image from "next/image";
+'use client';
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
+type SimpleCategory = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
 type CategoryIconProps = {
-  category: Category;
+  category: SimpleCategory;
   onClick?: () => void;
-  iconSize?: string; // Tailwind clases para tamaño del icono
-  textSize?: string; // Tailwind clases para tamaño del texto
+  textSize?: string;
   className?: string;
+  iconSize?: string;
 };
 
 export default function CategoryIcon({
   category,
   onClick,
-  iconSize = 'w-8 h-8', // tamaño por defecto
-  textSize = 'text-base font-medium', // tamaño por defecto
+  textSize = 'text-base font-medium',
   className = '',
+  iconSize = 'w-5 h-5'
 }: CategoryIconProps) {
   const params = useParams<{ category: string }>();
+  const isActive = category.slug === params.category;
 
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 cursor-pointer border-t border-gray-200 p-2 last-of-type:border-b hover:bg-sky-100 ${
-        category.slug === params.category ? 'bg-teal-200' : ''
+      className={`flex items-center gap-4 cursor-pointer border-t border-gray-200 p-3 last-of-type:border-b hover:bg-sky-100 ${
+        isActive ? 'bg-teal-200' : ''
       } ${className}`}
     >
-      <div className={`relative ${iconSize}`}>
-        <Image
-          fill
-          src={`/icon_${category.slug}.svg`}
-          alt={`Icono de ${category.name}`}
-        />
-      </div>
+      {/* Circulito indicador táctil */}
+      <div
+        className={`rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${iconSize} ${
+          isActive ? "bg-sky-500 border-sky-500" : "border-sky-500"
+        }`}
+      />
 
-      <Link
-        href={`/order/${category.slug}`}
-        className={textSize}
-      >
+      <Link href={`/order/${category.slug}`} className={textSize}>
         {category.name}
       </Link>
     </div>

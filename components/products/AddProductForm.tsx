@@ -1,58 +1,35 @@
-"use client";
-import { ProductSchema } from "@/src/schema";
-import ProductForm from "./ProductForm";
-import { toast } from "react-toastify";
-import { createProduct } from "@/actions/create-product-action";
+'use client';
+import React, { ReactElement, cloneElement } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AddProductForm({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface Props {
+  children: ReactElement<{ onSubmit?: (data: any) => void }>;
+}
 
-  const router = useRouter()
+export default function AddProductForm({ children }: Props) {
+  const router = useRouter();
 
-  const handleSubmit = async (formData: FormData) => {
-    const data = {
-      name: formData.get("name"),
-      price: formData.get("price"),
-      categoryId: formData.get("categoryId"),
-      image: formData.get("image"),
-    };
+  const handleSubmit = async (data: any) => {
+    let imageUrl = "";
 
-    const result = ProductSchema.safeParse(data);
-    if (!result.success) {
-      result.error.issues.forEach((issue) => {
-        toast.error(issue.message);
-      });
-      return;
+    if (data.imageFile) {
+      const formData = new FormData();
+      formData.append("file", data.imageFile);
+
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const json = await res.json();
+      imageUrl = json.url;
     }
 
-    const response = await createProduct(result.data);
+    await fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...data, image: imageUrl }),
+    });
 
-    if (response?.errors) {
-      response.errors.forEach((issue) => {
-        toast.error(issue.message);
-      });
-      return;
-    }
-
-    toast.success("Producto creado correctamente");
-    router.push('/admin/products');
+    alert("Producto creado!");
+    router.push("/admin/products");
   };
 
-  return (
-    <div className="bg-white mt-10 px-5 py-10 rounded-md shadow-md max-w-3xl mx-auto">
-      <form className="space-y-5" action={handleSubmit}>
-        {children}
-
-        <input
-          type="submit"
-          className="bg-sky-600 hover:bg-sky-800 text-white w-full rounded mt-5 p-3 uppercase font-bold cursor-pointer "
-          value="Registrar Producto"
-        />
-      </form>
-    </div>
-  );
+  return cloneElement(children, { onSubmit: handleSubmit });
 }

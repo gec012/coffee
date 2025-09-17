@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Logo from "../ui/Logo";
 import CategoryIcon from "../ui/CategoryIcon";
 
-type Category = {
+type SimpleCategory = {
   id: number;
   name: string;
   slug: string;
@@ -15,12 +15,12 @@ type Props = {
 }
 
 export default function OrderSidebar({ isOpen, onSelectCategory }: Props) {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<SimpleCategory[]>([]);
 
   useEffect(() => {
     fetch("/api/categories")
       .then((res) => res.json())
-      .then((data) => setCategories(data || []));
+      .then((data: SimpleCategory[]) => setCategories(data || []));
   }, []);
 
   return (
@@ -29,7 +29,7 @@ export default function OrderSidebar({ isOpen, onSelectCategory }: Props) {
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-40 md:hidden"
-          onClick={onSelectCategory} // cierra el sidebar
+          onClick={onSelectCategory}
         />
       )}
 
@@ -54,7 +54,7 @@ export default function OrderSidebar({ isOpen, onSelectCategory }: Props) {
                 category={category}
                 iconSize="w-8 h-8"
                 textSize="text-sm font-semibold"
-                onClick={onSelectCategory} // cierra el sidebar al seleccionar
+                onClick={onSelectCategory}
               />
             ))
           )}

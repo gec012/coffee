@@ -2,22 +2,19 @@
 import { useEffect, useState } from "react";
 import ImageUpload from "./ImageUpload";
 
-type Category = {
-  id: string;
-  name: string;
-};
+type Category = { id: number; name: string };
 
-type ProductFormProps = {
-  product?: {
-    name?: string;
-    price?: number;
-    categoryId?: string;
-    image?: string;
-  };
-};
+interface Props {
+  product?: { name?: string; price?: number; categoryId?: number; image?: string };
+  onSubmit: (data: { name: string; price: number; categoryId: number; imageFile?: File }) => void;
+}
 
-export default function ProductForm({ product }: ProductFormProps) {
+export default function ProductForm({ product, onSubmit }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [name, setName] = useState(product?.name || "");
+  const [price, setPrice] = useState(product?.price || 0);
+  const [categoryId, setCategoryId] = useState(product?.categoryId || 0);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetch("/api/categories")
@@ -25,49 +22,34 @@ export default function ProductForm({ product }: ProductFormProps) {
       .then(data => setCategories(data));
   }, []);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !price || !categoryId) return alert("Complete todos los campos");
+    onSubmit({ name, price, categoryId, imageFile: imageFile || undefined });
+  };
+
   return (
-    <>
-      <div className="space-y-2">
-        <label htmlFor="name" className="text-slate-800">Nombre:</label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          defaultValue={product?.name}
-          placeholder="Nombre Producto"
-          className="block w-full p-3 bg-slate-100 border border-gray-300 rounded"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="price" className="text-slate-800">Precio:</label>
-        <input
-          id="price"
-          name="price"
-          type="number"
-          step="0.01"
-          defaultValue={product?.price}
-          placeholder="Precio Producto"
-          className="block w-full p-3 bg-slate-100 border border-gray-300 rounded"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="categoryId" className="text-slate-800">Categoría:</label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          defaultValue={product?.categoryId}
-          className="block w-full p-3 bg-slate-200 border border-gray-300 rounded"
-        >
-          <option value="">-- Seleccione --</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-      </div>
-
-      <ImageUpload image={product?.image} />
-    </>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <input
+        type="text"
+        placeholder="Nombre"
+        value={name}
+        onChange={e => setName(e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Precio"
+        value={price}
+        onChange={e => setPrice(Number(e.target.value))}
+      />
+      <select value={categoryId} onChange={e => setCategoryId(Number(e.target.value))}>
+        <option value={0}>Seleccione categoría</option>
+        {categories.map(cat => (
+          <option key={cat.id} value={cat.id}>{cat.name}</option>
+        ))}
+      </select>
+      <ImageUpload image={product?.image} onChange={setImageFile} />
+      <button type="submit">Guardar</button>
+    </form>
   );
 }

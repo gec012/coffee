@@ -24,10 +24,13 @@
     "ag-grid-enterprise": "^34.2.0",
     "ag-grid-react": "^34.2.0",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.543.0",
     "next": "^14.2.32",
     "next-cloudinary": "6.5.0",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-toastify": "10.0.5",
@@ -38,6 +41,7 @@
     "zustand": "4.5.2"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.5",
     "@types/node": "20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
